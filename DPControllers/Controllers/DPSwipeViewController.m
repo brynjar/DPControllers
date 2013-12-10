@@ -110,7 +110,7 @@ int signum(int n) { return (n < 0) ? -1 : (n > 0) ? +1 : 0; }
 }
 
 - (void)resetViewControllerAtIndex:(int)index {
-    //UIViewController *controller = [self.childViewControllers objectAtIndex:index];
+
     UIViewController *controller = [childControllers objectForKey:[NSNumber numberWithInt:index]];
     
     if ([controller.view superview])
@@ -143,25 +143,6 @@ int signum(int n) { return (n < 0) ? -1 : (n > 0) ? +1 : 0; }
 }
 
 -(UIViewController *)viewControllerForPage:(NSInteger)page {
-//    UIViewController *vc = nil;
-//    if(page < [self.childViewControllers count]) {
-//        vc = self.childViewControllers[page];
-//    }
-//    
-//    if(!vc) {
-//        if (_delegate && [_delegate respondsToSelector:@selector(slideyController:viewControllerForPage:)]) {
-//            vc = [_delegate slideyController:self viewControllerForPage:page];
-//            if(vc) {
-//                int count = [self.childViewControllers count];
-//                while ([self.childViewControllers count] < page) {
-//                    [self addChildViewController:[_delegate slideyController:self viewControllerForPage:count]];
-//                    count ++;
-//                }
-//                [self addChildViewController:vc];
-//            }
-//        }
-//    }
-//    return vc;
     
     if (childControllers == nil) {
         childControllers = [NSMutableDictionary dictionary];
