@@ -82,7 +82,7 @@ int signum(int n) { return (n < 0) ? -1 : (n > 0) ? +1 : 0; }
         if(self.delegate && [self.delegate respondsToSelector:@selector(slideyController:willTransitionFrom:viewController:to:viewController:)])
             [self.delegate slideyController:self willTransitionFrom:(NSInteger)from viewController:fromvc to:(NSInteger)to viewController:tovc];
         
-        [self transitionFromViewController:fromvc toViewController:tovc duration:0.4 options:UIViewAnimationOptionTransitionNone animations:^{
+        [self transitionFromViewController:fromvc toViewController:tovc duration:0.2 options:UIViewAnimationOptionTransitionNone animations:^{
             float tmp = fromvc.view.center.x;
             fromvc.view.center = CGPointMake(3*self.view.center.x*signum(from-to), fromvc.view.center.y);
             tovc.view.center = CGPointMake(tmp, fromvc.view.center.y);

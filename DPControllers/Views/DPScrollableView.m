@@ -266,6 +266,7 @@
     scrollView.directionalLockEnabled = YES;
     scrollView.showsVerticalScrollIndicator = NO;
     scrollView.showsHorizontalScrollIndicator = NO;
+    scrollView.decelerationRate = UIScrollViewDecelerationRateFast;
     scrollView.clipsToBounds = NO;
     scrollView.delegate = self;
     [scrollView addGestureRecognizer:[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(tapped:)]];
