@@ -11,7 +11,7 @@
 
 @implementation DPScrollableViewCell
 @synthesize image, title, style, textColor, selected;
-@synthesize selectedTextColor, highlighted, highlightedTextColor;
+@synthesize selectedTextColor, highlighted, highlightedTextColor, highlightedBackgroundColor;
 
 - (id) initWithFrame:(CGRect)frame
 {
@@ -82,6 +82,7 @@
 
 - (void) drawRect:(CGRect)rect
 {
+    CGContextRef context = UIGraphicsGetCurrentContext();
     UIFont *font = normalFont;
     UIColor *color = textColor;
     if (highlighted)
@@ -90,6 +91,12 @@
         if (highlightedTextColor)
         {
             color = highlightedTextColor;
+        }
+        
+        if (highlightedBackgroundColor)
+        {
+            [highlightedBackgroundColor setFill];
+            CGContextFillRect(context, CGRectMake(0, 0, self.bounds.size.width, self.bounds.size.height));
         }
     }
     
@@ -100,6 +107,11 @@
         {
             color = selectedTextColor;
         }
+    }
+    
+    if (selected && highlighted)
+    {
+        font = highlightedFont;
     }
     
     if (color)
@@ -129,12 +141,11 @@
     
     if(self.separatorColor)
     {
-        CGContextRef c = UIGraphicsGetCurrentContext();
-        CGContextSaveGState(c);
+        CGContextSaveGState(context);
         [self.separatorColor setFill];
-        CGContextFillRect(c, CGRectMake(self.bounds.size.width-0.5, 0, 0.5, self.bounds.size.height));
-        CGContextFillRect(c, CGRectMake(0, 0, 0.5, self.bounds.size.height));
-        CGContextRestoreGState(c);
+        CGContextFillRect(context, CGRectMake(self.bounds.size.width-0.5, 0, 0.5, self.bounds.size.height));
+        CGContextFillRect(context, CGRectMake(0, 0, 0.5, self.bounds.size.height));
+        CGContextRestoreGState(context);
     }
 }
 

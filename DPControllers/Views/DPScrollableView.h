@@ -77,6 +77,7 @@ DPMarginMake(top, right, bottom, left)
 - (DPScrollableViewCell *) cellAtIndex:(NSUInteger)index;
 - (UIView *) viewAtIndex:(NSUInteger)index;
 - (void) setHighlightOnAllRows:(BOOL)high;
+- (void)reloadTabTitles;
 
 @end
 

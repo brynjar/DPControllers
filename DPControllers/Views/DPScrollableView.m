@@ -279,51 +279,65 @@
     BOOL hasImage = [ds respondsToSelector:@selector(scrollableView:getImageForIndex:)];
     for (int i = 0; i < count; i++)
     {
-        UIView *lbl = nil;
+        UIView *label = nil;
         if (hasView)
         {
-            lbl = [ds scrollableView:self getViewForIndex:i];
+            label = [ds scrollableView:self getViewForIndex:i];
         }
         
-        if (!lbl)
+        if (!label)
         {
-            DPScrollableViewCell *l = [[DPScrollableViewCell alloc] initWithFrame:CGRectMake(x, 0, self.frame.size.width / 3, scrollView.frame.size.height)];
-            [scrollView addSubview:l];
+            DPScrollableViewCell *cell = [[DPScrollableViewCell alloc] initWithFrame:CGRectMake(x, 0, self.frame.size.width / 3, scrollView.frame.size.height)];
+            [scrollView addSubview:cell];
             if (hasText)
             {
-                l.title = [ds scrollableView:self getTitleForIndex:i];
+                cell.title = [ds scrollableView:self getTitleForIndex:i];
             }
             
             if (hasImage)
             {
-                l.image = [ds scrollableView:self getImageForIndex:i];
+                cell.image = [ds scrollableView:self getImageForIndex:i];
             }
             
-            l.separatorColor = [UIColor darkGrayColor];
-            lbl = l;
+            cell.separatorColor = [UIColor darkGrayColor];
+            label = cell;
             if ([ds respondsToSelector:@selector(scrollableView:didAddCell:)])
             {
-                [ds scrollableView:self didAddCell:l];
+                [ds scrollableView:self didAddCell:cell];
             }
         }
         else
         {
-            if (!lbl.superview)
+            if (!label.superview)
             {
-                lbl.frame = CGRectMake(x, 0, self.frame.size.width / 3, scrollView.frame.size.height);
-                [scrollView addSubview:lbl];
+                label.frame = CGRectMake(x, 0, self.frame.size.width / 3, scrollView.frame.size.height);
+                [scrollView addSubview:label];
             }
         }
         
-        x += lbl.frame.size.width;
-        rect = CGRectUnion(rect, lbl.frame);
-        lbl.tag = i + 1;
-        lbl.backgroundColor = [UIColor clearColor];
+        x += label.frame.size.width;
+        rect = CGRectUnion(rect, label.frame);
+        label.tag = i + 1;
+        label.backgroundColor = [UIColor clearColor];
     }
     
     scrollView.contentSize = rect.size;
 }
 
+- (void)reloadTabTitles
+{
+    if ([datasource respondsToSelector:@selector(scrollableView:getTitleForIndex:)])
+    {
+        NSUInteger i = 0;
+        for (DPScrollableViewCell *cell in scrollView.subviews)
+        {
+            cell.title = [datasource scrollableView:self getTitleForIndex:i];
+            [cell setNeedsDisplay];
+            i++;
+        }
+    }
+    
+}
 
 - (UIView *) viewAtIndex:(NSUInteger)index
 {

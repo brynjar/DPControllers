@@ -24,6 +24,7 @@
 @interface DPSwipeViewController : UIViewController <UIScrollViewDelegate, DPSwipeViewControllerDelegate, DPScrollableViewDatasource> {
     BOOL swiping;
     int transitioningTo;
+    NSMutableDictionary *childControllers;
 }
 
 @property (nonatomic) int numberOfPages;
@@ -33,5 +34,7 @@
 @property (nonatomic, strong) DPScrollableView *scrollableView;
 
 -(id)initWithDelegate:(id<DPSwipeViewControllerDelegate>)delegate;
+- (void)setNumberOfPagesWithoutReset:(int)numberOfPages;
+- (void)resetViewControllerAtIndex:(int)index;
 
 @end
