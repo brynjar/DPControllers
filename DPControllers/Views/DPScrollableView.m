@@ -151,7 +151,11 @@
     float offset = point * scrollView.frame.size.width;
     if ( offset < (scrollView.contentSize.width - scrollView.frame.size.width + 10) )
     {
-        [scrollView setContentOffset:CGPointMake(offset, 0) animated:YES];
+        [UIView animateWithDuration:0.15 animations:^() {
+            scrollView.contentOffset = CGPointMake(offset, 0);
+        } completion:^(BOOL finished) {
+            [self scrollViewDidEndScrollingAnimation:nil];
+        }];
     }
 }
 
