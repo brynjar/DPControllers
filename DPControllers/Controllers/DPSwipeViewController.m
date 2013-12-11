@@ -31,7 +31,7 @@ int signum(int n) { return (n < 0) ? -1 : (n > 0) ? +1 : 0; }
         }
         // Do any additional setup after loading the view, typically from a nib.
         
-        _scrollableView = [[DPScrollableView alloc] initWithFrame:CGRectMake(0, 0, self.view.frame.size.width, 40.0)];
+        _scrollableView = [[DPScrollableView alloc] initWithFrame:CGRectMake(0, 0, self.view.frame.size.width, 44.0)];
         [self.view addSubview:_scrollableView];
         _scrollableView.datasource = self;
     }
@@ -43,7 +43,7 @@ int signum(int n) { return (n < 0) ? -1 : (n > 0) ? +1 : 0; }
     [super viewDidLoad];
     
     UIView* contentView = ((UIViewController *)[self viewControllerForPage:0]).view;
-    contentView.frame = CGRectMake(0, 40.0, self.view.frame.size.width, self.view.frame.size.height - 40.0);
+    contentView.frame = CGRectMake(0, 44.0, self.view.frame.size.width, self.view.frame.size.height - 44.0);
     contentView.autoresizingMask = UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight;
     [self.view addSubview:contentView];
     
@@ -123,7 +123,7 @@ int signum(int n) { return (n < 0) ? -1 : (n > 0) ? +1 : 0; }
     [childControllers removeObjectForKey:[NSNumber numberWithInt:index]];
     
     UIView* contentView = ((UIViewController *)[self viewControllerForPage:index]).view;
-    contentView.frame = CGRectMake(0, 40.0, self.view.frame.size.width, self.view.frame.size.height - 40.0);
+    contentView.frame = CGRectMake(0, 44.0, self.view.frame.size.width, self.view.frame.size.height - 44.0);
     contentView.autoresizingMask = UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight;
     [self.view addSubview:contentView];
     
@@ -137,7 +137,7 @@ int signum(int n) { return (n < 0) ? -1 : (n > 0) ? +1 : 0; }
     [childControllers removeAllObjects];
     
     UIView* contentView = ((UIViewController *)[self viewControllerForPage:self.currentPage]).view;
-    contentView.frame = CGRectMake(0, 40.0, self.view.frame.size.width, self.view.frame.size.height - 40.0);
+    contentView.frame = CGRectMake(0, 44.0, self.view.frame.size.width, self.view.frame.size.height - 44.0);
     contentView.autoresizingMask = UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight;
     [self.view addSubview:contentView];
 }
