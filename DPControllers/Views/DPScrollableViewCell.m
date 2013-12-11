@@ -11,7 +11,7 @@
 
 @implementation DPScrollableViewCell
 @synthesize image, title, style, textColor, selected;
-@synthesize selectedTextColor, highlighted, highlightedTextColor, highlightedBackgroundColor;
+@synthesize selectedTextColor, selectedFont, highlighted, highlightedTextColor, highlightedBackgroundColor;
 
 - (id) initWithFrame:(CGRect)frame
 {
@@ -20,7 +20,7 @@
     {
         selectedFont = [UIFont boldSystemFontOfSize:[UIFont systemFontSize]];
         normalFont = [UIFont systemFontOfSize:[UIFont systemFontSize]];
-        highlightedFont = [UIFont italicSystemFontOfSize:[UIFont systemFontSize]];
+        highlightedFont = [UIFont systemFontOfSize:[UIFont systemFontSize]];
         self.textColor = [UIColor lightGrayColor];
         self.highlightedTextColor = [UIColor orangeColor];
         self.selectedTextColor = [UIColor whiteColor];
@@ -109,11 +109,6 @@
         }
     }
     
-    if (selected && highlighted)
-    {
-        font = highlightedFont;
-    }
-    
     if (color)
     {
         [color setFill];
@@ -130,7 +125,7 @@
             [title drawInRect:textRect withFont:font lineBreakMode:UILineBreakModeTailTruncation];
             break;
         case ScrollableViewStyleTextOnly:
-            [title drawCenteredInRect:textRect withFont:font lineBreakMode:UILineBreakModeTailTruncation alignment:UITextAlignmentCenter];
+            [title drawCenteredInRect:textRect withFont:font lineBreakMode:UILineBreakModeWordWrap alignment:UITextAlignmentCenter];
             break;
         case ScrollableViewStyleImageOnly:
             [image drawInRect:imageRect];

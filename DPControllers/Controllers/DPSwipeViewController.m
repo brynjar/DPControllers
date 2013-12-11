@@ -87,6 +87,7 @@ int signum(int n) { return (n < 0) ? -1 : (n > 0) ? +1 : 0; }
             fromvc.view.center = CGPointMake(3*self.view.center.x*signum(from-to), fromvc.view.center.y);
             tovc.view.center = CGPointMake(tmp, fromvc.view.center.y);
         } completion:^(BOOL finished) {
+            NSLog(@"swipe %d finished %d", swiping, finished);
             current.currentPage = to;
             if(dele && [dele respondsToSelector:@selector(slideyController:didTransitionFrom:viewController:to:viewController:)])
                 [dele slideyController:self didTransitionFrom:from viewController:fromvc to:to viewController:tovc];

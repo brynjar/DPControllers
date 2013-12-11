@@ -37,6 +37,7 @@ typedef enum {
 @property (nonatomic) ScrollableViewStyle style;
 @property (nonatomic, strong) UIColor *textColor;
 @property (nonatomic, strong) UIColor *selectedTextColor;
+@property (nonatomic, strong) UIFont *selectedFont;
 @property (nonatomic, strong) UIColor *highlightedTextColor;
 @property (nonatomic, strong) UIColor *highlightedBackgroundColor;
 @property (nonatomic, strong) UIColor *separatorColor;
