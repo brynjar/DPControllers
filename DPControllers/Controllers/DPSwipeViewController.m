@@ -187,4 +187,9 @@ int signum(int n) { return (n < 0) ? -1 : (n > 0) ? +1 : 0; }
         swiping = NO;
 }
 
+- (void)scrollableView:(DPScrollableView *)view didLongPressCellAtIndex:(int)index
+{
+    
+}
+
 @end

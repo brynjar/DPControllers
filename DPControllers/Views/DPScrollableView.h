@@ -49,6 +49,7 @@ DPMarginMake(top, right, bottom, left)
 - (void) scrollableView:(DPScrollableView *)view didAddCell:(DPScrollableViewCell *)cell;
 - (void) scrollableView:(DPScrollableView *)view willSelectCellAtIndex:(int)index;
 - (void) scrollableView:(DPScrollableView *)view didSelectCellAtIndex:(int)index;
+- (void) scrollableView:(DPScrollableView *)view didLongPressCellAtIndex:(int)index;
 
 @required
 - (int) numberOfCellsforScrollableView:(DPScrollableView *)view;
@@ -78,6 +79,7 @@ DPMarginMake(top, right, bottom, left)
 - (UIView *) viewAtIndex:(NSUInteger)index;
 - (void) setHighlightOnAllRows:(BOOL)high;
 - (void)reloadTabTitles;
+- (void)reloadTabAtIndex:(int)index;
 
 @end
 
