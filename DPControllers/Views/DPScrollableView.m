@@ -107,6 +107,29 @@
 }
 
 
+- (void)longPressTapped:(UITapGestureRecognizer *)gesture
+{
+    if (gesture.state == UIGestureRecognizerStateBegan)
+    {
+        CGPoint p = [gesture locationInView:scrollView];
+        int point = ( (int)(p.x / scrollView.frame.size.width) ) * scrollView.frame.size.width + 2;
+        CGPoint point2 = CGPointMake(point, p.y);
+        
+        int index = (int)roundf(point2.x / scrollView.frame.size.width);
+        int count = [datasource numberOfCellsforScrollableView:self];
+        if (index >= count)
+        {
+            index = count - 1;
+        }
+        
+        if ([datasource respondsToSelector:@selector(scrollableView:didLongPressCellAtIndex:)])
+        {
+            [datasource scrollableView:self didLongPressCellAtIndex:index];
+        }
+    }
+}
+
+
 - (void) scrollViewDidScroll:(UIScrollView *)sView
 {
     [self adjustPointers];
@@ -148,7 +171,8 @@
         point = count - 1;
     }
     
-    float offset = point * scrollView.frame.size.width;
+    CGFloat width = scrollView.frame.size.width;
+    float offset = point * width;
     if ( offset < (scrollView.contentSize.width - scrollView.frame.size.width + 10) )
     {
         [UIView animateWithDuration:0.15 animations:^() {
@@ -181,7 +205,8 @@
     }
     
     [UIView commitAnimations];
-    selectedIndex = [scrollView subviewAtPoint:CGPointMake(scrollView.contentOffset.x + scrollView.bounds.size.width / 2, 5)].tag - 1;
+    CGPoint point = CGPointMake(scrollView.contentOffset.x + scrollView.bounds.size.width / 2, 5);
+    selectedIndex = [scrollView subviewAtPoint:point].tag - 1;
     int i = 0;
     for (UIView *v in scrollView.subviews)
     {
@@ -274,6 +299,8 @@
     scrollView.clipsToBounds = NO;
     scrollView.delegate = self;
     [scrollView addGestureRecognizer:[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(tapped:)]];
+    UILongPressGestureRecognizer *longPressGesture = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(longPressTapped:)];
+    [scrollView addGestureRecognizer:longPressGesture];
     
     datasource = ds;
     float x = 0;
@@ -342,6 +369,21 @@
         }
     }
     
+}
+
+- (void)reloadTabAtIndex:(int)index
+{
+    if ([datasource respondsToSelector:@selector(scrollableView:getViewForIndex:)])
+    {
+        UIView *view = [datasource scrollableView:self getViewForIndex:index];
+        int count = [datasource numberOfCellsforScrollableView:self];
+        CGFloat x = (self.frame.size.width / 3) * (count-1);
+        view.frame = CGRectMake(x, 0, self.frame.size.width / 3, scrollView.frame.size.height);
+        view.tag = index + 1;
+        [[scrollView.subviews objectAtIndex:index] removeFromSuperview];
+        [scrollView insertSubview:view atIndex:index];
+        [self resetPointers];
+    }
 }
 
 - (UIView *) viewAtIndex:(NSUInteger)index
