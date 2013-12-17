@@ -42,6 +42,11 @@ int signum(int n) { return (n < 0) ? -1 : (n > 0) ? +1 : 0; }
 {
     [super viewDidLoad];
     
+    if (self.numberOfPages == 0)
+    {
+        return;
+    }
+    
     UIView* contentView = ((UIViewController *)[self viewControllerForPage:0]).view;
     contentView.frame = CGRectMake(0, 44.0, self.view.frame.size.width, self.view.frame.size.height - 44.0);
     contentView.autoresizingMask = UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight;
@@ -101,8 +106,11 @@ int signum(int n) { return (n < 0) ? -1 : (n > 0) ? +1 : 0; }
 
 -(void)setNumberOfPages:(int)numberOfPages {
     _numberOfPages = numberOfPages;
-    [self resetChildViewControllers];
-    [self.scrollableView setDatasource:self.scrollableView.datasource];
+    if (numberOfPages >= 1) {
+        [self resetChildViewControllers];
+        [self.scrollableView setDatasource:self.scrollableView.datasource];
+    }
+    
 }
 
 - (void)setNumberOfPagesWithoutReset:(int)numberOfPages {
