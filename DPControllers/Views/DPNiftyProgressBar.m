@@ -10,6 +10,8 @@
 #import <QuartzCore/QuartzCore.h>
 #import "UIColor+GradientOffset.h"
 
+const float BARSIZE = 5.0;
+
 @implementation DPNiftyProgressBar
 
 - (id)initWithFrame:(CGRect)frame
@@ -17,30 +19,34 @@
     self = [super initWithFrame:frame];
     if (self) {
         // Initialization code
-        gutterView = [[RectFillerView alloc] initWithFrame:CGRectMake(5, self.frame.size.height - 3, self.frame.size.width - 10, 3)];
+        gutterView = [[RectFillerView alloc] initWithFrame:CGRectMake(5, self.frame.size.height - BARSIZE, self.frame.size.width - 10, BARSIZE)];
         gutterView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleTopMargin;
         gutterView.color = [UIColor lightGrayColor];
-        gutterView.layer.cornerRadius = 2.0;
+        gutterView.layer.cornerRadius = BARSIZE;
+        gutterView.clipsToBounds = YES;
+        gutterView.layer.shadowColor = [UIColor colorWithRed:0.3 green:0.3 blue:0.3 alpha:0.5].CGColor;
+        gutterView.layer.shadowOffset = CGSizeMake(0.0, -1.0);
+        gutterView.layer.shadowRadius = 3.0;
         [self addSubview:gutterView];
         
-        progressView = [[RectFillerView alloc] initWithFrame:CGRectMake(5, self.frame.size.height - 3, 0, 3)];
+        progressView = [[RectFillerView alloc] initWithFrame:CGRectMake(5, self.frame.size.height - BARSIZE, 0, BARSIZE)];
         progressView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleRightMargin | UIViewAutoresizingFlexibleTopMargin;
-        progressView.layer.cornerRadius = 2.0;
+        progressView.layer.cornerRadius = BARSIZE;
+        progressView.clipsToBounds = YES;
         [self addSubview:progressView];
         
-        rulerView = [[DPNiftyRulerView alloc] initWithFrame:CGRectMake(5, self.frame.size.height - 3, self.frame.size.width - 10, 3)];
+        rulerView = [[DPNiftyRulerView alloc] initWithFrame:CGRectMake(5, self.frame.size.height - BARSIZE - 1, self.frame.size.width - 10, BARSIZE + 1)];
         rulerView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleTopMargin;
         rulerView.sectionPoints = self.sectionPoints;
         [self addSubview:rulerView];
         
-        label = [[UILabel alloc] initWithFrame:CGRectMake(self.frame.size.width - 40.0, 0, 40.0, self.frame.size.height - 3)];
+        label = [[UILabel alloc] initWithFrame:CGRectMake(self.frame.size.width - 90.0, 0, 80.0, self.frame.size.height - BARSIZE - 2)];
         [self addSubview:label];
         label.textAlignment = UITextAlignmentRight;
         label.textColor = [UIColor blackColor];
         label.font = [UIFont systemFontOfSize:10.0];
-        label.backgroundColor = [UIColor clearColor];
         label.highlightedTextColor = [UIColor blackColor];
-        label.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleRightMargin;
+        label.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin;
         
         self.lineColor = [UIColor blackColor];
         self.progressColor = [UIColor blueColor];
@@ -89,8 +95,16 @@
 
 -(void)setProgress:(float)progress {
     _progress = progress;
-    label.text = [NSString stringWithFormat:@"%0.1f%%", progress*100.0];
-    
+    if(progress > 0) {
+        if(progress == 1.0)
+            label.text = [NSString stringWithFormat:@"%0.1f%% (%0.0f)", progress*100.0, self.points];
+        else
+            label.text = [NSString stringWithFormat:@"%0.1f%%", progress*100.0];
+    }
+    else if(self.points > 0)
+        label.text = [NSString stringWithFormat:@"%0.0f", self.points];
+    else
+        label.text = @" ➖ ";
     int count = 0;
     float offset = 0;
     float lastP = 0;
@@ -105,10 +119,6 @@
         lastP = val;
     }
     
-    [UIView beginAnimations:@"progress animations" context:nil];
-    [UIView setAnimationCurve:UIViewAnimationCurveEaseInOut];
-    [UIView setAnimationDelay:0.4];
-    progressView.frame = CGRectMake(5, self.frame.size.height - 3, (self.frame.size.width - 10)* progress, 3.0);
     if(self.thresholdColors && [self.thresholdColors count] == (self.numberOfSections + 1)) {
         if(self.progressColorType == DPNiftyProgressColorTypeRGBGradient && count < self.numberOfSections)
             progressView.color = [UIColor RGBColorBetween:[self.thresholdColors objectAtIndex:count] and:[self.thresholdColors objectAtIndex:count+1] withOffset:offset];
@@ -123,12 +133,18 @@
         else if(self.progressColorType == DPNiftyProgressColorTypeHSVGradient)
             progressView.color = [UIColor HSVColorBetween:self.fromProgressColor and:self.toProgressColor withOffset:progress];
     }
-    label.textColor = progressView.color;
+    label.textColor = [UIColor darkGrayColor];
+    
+    [UIView beginAnimations:@"progress animations" context:nil];
+    [UIView setAnimationCurve:UIViewAnimationCurveEaseInOut];
+    [UIView setAnimationDelay:0.4];
+    progressView.frame = CGRectMake(5, self.frame.size.height - BARSIZE, (self.frame.size.width - 10)* progress, BARSIZE);
     [UIView commitAnimations];
 }
 
 -(void)setFrame:(CGRect)frame {
     [super setFrame:frame];
+    
     [self setProgress:self.progress];
 }
 
@@ -160,7 +176,7 @@
     [self.lineColor setStroke];
     float resolution = self.frame.size.width / self.numberOfSections;
     float x = resolution;
-    for(int i=0;i<self.numberOfSections;i++) {
+    for(int i=0;i<self.numberOfSections-1;i++) {
         if(self.sectionPoints && [self.sectionPoints count] == self.numberOfSections) {
             x = ([[self.sectionPoints objectAtIndex:i] intValue]/[[self.sectionPoints lastObject] floatValue])*self.frame.size.width;
         }
