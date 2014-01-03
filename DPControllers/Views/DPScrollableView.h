@@ -56,32 +56,36 @@ DPMarginMake(top, right, bottom, left)
 
 @end
 
-@interface DPScrollableView : UIView <UIScrollViewDelegate> {
+
+@interface DPScrollableView : UIView <UIScrollViewDelegate>
+{
     UIScrollView *scrollView;
     UIView *leftPointer;
     UIView *rightPointer;
     UIView *centerPointer;
     PointerType pointerType;
-    id<DPScrollableViewDatasource> __weak datasource;
+    id <DPScrollableViewDatasource> __weak datasource;
     UIColor *textColor;
     int selectedIndex;
 }
 
 @property (nonatomic) PointerType pointerType;
-@property (nonatomic, weak) id<DPScrollableViewDatasource> datasource;
+@property (nonatomic, weak) id <DPScrollableViewDatasource> datasource;
 @property (nonatomic, strong) UIView *leftPointer;
 @property (nonatomic, strong) UIView *rightPointer;
 @property (nonatomic, strong) UIView *centerPointer;
 @property (nonatomic, strong) UIColor *textColor;
 @property (nonatomic) int selectedIndex;
 
-- (DPScrollableViewCell *) cellAtIndex:(NSUInteger)index;
-- (UIView *) viewAtIndex:(NSUInteger)index;
-- (void) setHighlightOnAllRows:(BOOL)high;
+- (DPScrollableViewCell *)cellAtIndex:(NSUInteger)index;
+- (UIView *)viewAtIndex:(NSUInteger)index;
+- (void)setHighlightOnAllRows:(BOOL)high;
 - (void)reloadTabTitles;
 - (void)reloadTabAtIndex:(int)index;
+- (void)setSelectedIndex:(int)index animated:(BOOL)animated;
 
 @end
+
 
 @interface UIView (Extras)
 

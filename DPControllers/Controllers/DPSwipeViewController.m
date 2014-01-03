@@ -71,74 +71,120 @@ int signum(int n) { return (n < 0) ? -1 : (n > 0) ? +1 : 0; }
         to = self.currentPage - 1;
     }
     swiping = YES;
-    [self transitionFrom:from to:to];
+    [self transitionFrom:from to:to animated:YES];
 }
 
--(void)transitionFrom:(NSInteger)from to:(NSInteger)to {
-    if(from != to && to < self.numberOfPages && to >= 0 && to != transitioningTo) {
+
+- (void)startAtTabIndex:(NSInteger)index
+{
+    [self.scrollableView setSelectedIndex:index animated:NO];
+    [self transitionFrom:0 to:index animated:NO];
+}
+
+
+-(void)transitionFrom:(NSInteger)from to:(NSInteger)to animated:(BOOL)animated
+{
+    if (from != to && to < self.numberOfPages && to >= 0 && to != transitioningTo)
+    {
         transitioningTo = to; //dummy variable with no other purpose rather than allowing transitions to not call here twice.
         UIViewController *fromvc = [self viewControllerForPage:from];
         UIViewController *tovc = [self viewControllerForPage:to];
         tovc.view.frame = fromvc.view.frame;
-        tovc.view.center = CGPointMake(3*self.view.center.x*signum(to-from), fromvc.view.center.y);
-        __block id<DPSwipeViewControllerDelegate> dele = self.delegate;
-        __block DPScrollableView *scView = self.scrollableView;
-        __block DPSwipeViewController *current = self;
-        if(self.delegate && [self.delegate respondsToSelector:@selector(slideyController:willTransitionFrom:viewController:to:viewController:)])
-            [self.delegate slideyController:self willTransitionFrom:(NSInteger)from viewController:fromvc to:(NSInteger)to viewController:tovc];
+        tovc.view.center = CGPointMake(3 * self.view.center.x * signum(to-from), fromvc.view.center.y);
+        __weak id <DPSwipeViewControllerDelegate> weakDelegate = self.delegate;
+        __weak DPScrollableView *weakScrollableView = self.scrollableView;
+        __weak DPSwipeViewController *weakSelf = self;
         
-        [self transitionFromViewController:fromvc toViewController:tovc duration:0.2 options:UIViewAnimationOptionTransitionNone animations:^{
+        if (self.delegate && [self.delegate respondsToSelector:@selector(slideyController:willTransitionFrom:viewController:to:viewController:)])
+        {
+            [self.delegate slideyController:self willTransitionFrom:(NSInteger)from viewController:fromvc to:(NSInteger)to viewController:tovc];
+        }
+        
+        CGFloat duration = (animated ? 0.2 : 0);
+        [self transitionFromViewController:fromvc toViewController:tovc duration:duration options:UIViewAnimationOptionTransitionNone animations:^{
             float tmp = fromvc.view.center.x;
             fromvc.view.center = CGPointMake(3*self.view.center.x*signum(from-to), fromvc.view.center.y);
             tovc.view.center = CGPointMake(tmp, fromvc.view.center.y);
         } completion:^(BOOL finished) {
-            NSLog(@"swipe %d finished %d", swiping, finished);
-            current.currentPage = to;
-            if(dele && [dele respondsToSelector:@selector(slideyController:didTransitionFrom:viewController:to:viewController:)])
-                [dele slideyController:self didTransitionFrom:from viewController:fromvc to:to viewController:tovc];
-            if(swiping) {
-                [scView setSelectedIndex:to];
+
+            weakSelf.currentPage = to;
+            
+            if (weakDelegate && [weakDelegate respondsToSelector:@selector(slideyController:didTransitionFrom:viewController:to:viewController:)])
+            {
+                [weakDelegate slideyController:self didTransitionFrom:from viewController:fromvc to:to viewController:tovc];
+            }
+            if (swiping)
+            {
+                [weakScrollableView setSelectedIndex:to];
                 swiping = NO;
             }
         }];
     }
 }
 
--(void)setNumberOfPages:(int)numberOfPages {
+-(void)setNumberOfPages:(int)numberOfPages
+{
     _numberOfPages = numberOfPages;
-    if (numberOfPages >= 1) {
+    if (numberOfPages >= 1)
+    {
         [self resetChildViewControllers];
         [self.scrollableView setDatasource:self.scrollableView.datasource];
     }
     
 }
 
-- (void)setNumberOfPagesWithoutReset:(int)numberOfPages {
+- (void)setNumberOfPagesWithoutReset:(int)numberOfPages
+{
     _numberOfPages = numberOfPages;
     [self.scrollableView setDatasource:self.scrollableView.datasource];
 }
 
-- (void)resetViewControllerAtIndex:(int)index {
 
+- (void)insertControllerAtIndex:(NSInteger)index
+{
+    for (NSInteger i = [childControllers count] - 1; i >= index; i--)
+    {
+        UIViewController *controller = [childControllers objectForKey:[NSNumber numberWithInt:i]];
+        
+        if ([controller.view superview])
+        {
+            [controller.view removeFromSuperview];
+        }
+        
+        [childControllers removeObjectForKey:[NSNumber numberWithInt:i]];
+        [childControllers setObject:controller forKey:[NSNumber numberWithInt:i+1]];
+    }
+    _numberOfPages++;
+    self.currentPage = index;
+    
+    UIView *contentView = ((UIViewController *)[self viewControllerForPage:index]).view;
+    contentView.frame = CGRectMake(0, 44.0, self.view.frame.size.width, self.view.frame.size.height - 44.0);
+    contentView.autoresizingMask = UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight;
+    [self.view addSubview:contentView];
+    
+    [self.scrollableView setDatasource:self.scrollableView.datasource];
+}
+
+
+- (void)resetViewControllerAtIndex:(int)index
+{
     UIViewController *controller = [childControllers objectForKey:[NSNumber numberWithInt:index]];
     
     if ([controller.view superview])
     {
         [controller.view removeFromSuperview];
-        
     }
     
     [controller removeFromParentViewController];
     [childControllers removeObjectForKey:[NSNumber numberWithInt:index]];
     
-    UIView* contentView = ((UIViewController *)[self viewControllerForPage:index]).view;
+    UIView *contentView = ((UIViewController *)[self viewControllerForPage:index]).view;
     contentView.frame = CGRectMake(0, 44.0, self.view.frame.size.width, self.view.frame.size.height - 44.0);
     contentView.autoresizingMask = UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight;
     [self.view addSubview:contentView];
-    
 }
 
--(void) resetChildViewControllers {
+-(void)resetChildViewControllers {
     for (UIViewController *controller in self.childViewControllers) {
         [controller.view removeFromSuperview];
         [controller removeFromParentViewController];
@@ -189,8 +235,8 @@ int signum(int n) { return (n < 0) ? -1 : (n > 0) ? +1 : 0; }
 }
 
 -(void)scrollableView:(DPScrollableView *)view didSelectCellAtIndex:(int)index {
-    if(!swiping)
-        [self transitionFrom:self.currentPage to:index];
+    if (!swiping)
+        [self transitionFrom:self.currentPage to:index animated:YES];
     else
         swiping = NO;
 }

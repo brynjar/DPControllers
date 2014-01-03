@@ -33,8 +33,10 @@
 @property (nonatomic, weak) id<DPSwipeViewControllerDelegate> delegate;
 @property (nonatomic, strong) DPScrollableView *scrollableView;
 
--(id)initWithDelegate:(id<DPSwipeViewControllerDelegate>)delegate;
+- (id)initWithDelegate:(id<DPSwipeViewControllerDelegate>)delegate;
 - (void)setNumberOfPagesWithoutReset:(int)numberOfPages;
 - (void)resetViewControllerAtIndex:(int)index;
+- (void)startAtTabIndex:(NSInteger)index;
+- (void)insertControllerAtIndex:(NSInteger)index;
 
 @end

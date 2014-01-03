@@ -19,7 +19,7 @@
 @synthesize leftPointer, centerPointer, rightPointer;
 @synthesize textColor;
 
-- (id) initWithFrame:(CGRect)frame
+- (id)initWithFrame:(CGRect)frame
 {
     self = [super initWithFrame:frame];
     if (self)
@@ -32,7 +32,7 @@
 }
 
 
-- (void) setPointerType:(PointerType)pType
+- (void)setPointerType:(PointerType)pType
 {
     pointerType = pType;
     CGRect frame = self.frame;
@@ -89,7 +89,7 @@
 }
 
 
-- (UIView *) hitTest:(CGPoint)point withEvent:(UIEvent *)event
+- (UIView *)hitTest:(CGPoint)point withEvent:(UIEvent *)event
 {
     if ([self pointInside:point withEvent:event])
     {
@@ -99,11 +99,11 @@
 }
 
 
-- (void) tapped:(UITapGestureRecognizer *)gesture
+- (void)tapped:(UITapGestureRecognizer *)gesture
 {
     CGPoint p = [gesture locationInView:scrollView];
     int point = ( (int)(p.x / scrollView.frame.size.width) ) * scrollView.frame.size.width + 2;
-    [self reset:CGPointMake(point, p.y)];
+    [self reset:CGPointMake(point, p.y) animated:YES];
 }
 
 
@@ -130,22 +130,22 @@
 }
 
 
-- (void) scrollViewDidScroll:(UIScrollView *)sView
+- (void)scrollViewDidScroll:(UIScrollView *)sView
 {
     [self adjustPointers];
 }
 
 
-- (void) scrollViewDidEndDecelerating:(UIScrollView *)sView
+- (void)scrollViewDidEndDecelerating:(UIScrollView *)sView
 {
-    [self reset:sView.contentOffset];
+    [self reset:sView.contentOffset animated:YES];
     [self resetPointers];
 }
 
 
-- (void) scrollViewDidEndDragging:(UIScrollView *)sView willDecelerate:(BOOL)decelerate
+- (void)scrollViewDidEndDragging:(UIScrollView *)sView willDecelerate:(BOOL)decelerate
 {
-    [self reset:sView.contentOffset];
+    [self reset:sView.contentOffset animated:YES];
     if (!decelerate)
     {
         [self resetPointers];
@@ -153,7 +153,7 @@
 }
 
 
-- (void) scrollViewDidEndScrollingAnimation:(UIScrollView *)sVew
+- (void)scrollViewDidEndScrollingAnimation:(UIScrollView *)sVew
 {
     if (!scrollView.isDecelerating && !scrollView.isDragging)
     {
@@ -162,7 +162,7 @@
 }
 
 
-- (void) reset:(CGPoint)p
+- (void)reset:(CGPoint)p animated:(BOOL)animated
 {
     int point = (int)roundf(p.x / scrollView.frame.size.width);
     int count = [datasource numberOfCellsforScrollableView:self];
@@ -175,16 +175,58 @@
     float offset = point * width;
     if ( offset < (scrollView.contentSize.width - scrollView.frame.size.width + 10) )
     {
-        [UIView animateWithDuration:0.15 animations:^() {
+        if (animated)
+        {
+            [UIView animateWithDuration:0.15 animations:^() {
+                scrollView.contentOffset = CGPointMake(offset, 0);
+            } completion:^(BOOL finished) {
+                [self scrollViewDidEndScrollingAnimation:nil];
+            }];
+        }
+        else
+        {
             scrollView.contentOffset = CGPointMake(offset, 0);
-        } completion:^(BOOL finished) {
-            [self scrollViewDidEndScrollingAnimation:nil];
-        }];
+            [self setSelectedTab];
+        }
+        
     }
 }
 
 
-- (void) resetPointers
+- (void)setSelectedTab
+{
+    if ([datasource respondsToSelector:@selector(scrollableView:willSelectCellAtIndex:)])
+    {
+        [datasource scrollableView:self willSelectCellAtIndex:selectedIndex];
+    }
+    
+    CGPoint point = CGPointMake(scrollView.contentOffset.x + scrollView.bounds.size.width / 2, 5);
+    selectedIndex = [scrollView subviewAtPoint:point].tag - 1;
+    int i = 0;
+    for (UIView *v in scrollView.subviews)
+    {
+        if ([v isKindOfClass:[DPScrollableViewCell class]])
+        {
+            if (i == selectedIndex)
+            {
+                ( (DPScrollableViewCell *)v ).selected = YES;
+            }
+            else
+            {
+                ( (DPScrollableViewCell *)v ).selected = NO;
+            }
+            
+            [v setNeedsDisplay];
+        }
+        
+        i++;
+    }
+    // deliberately not calling @selector(scrollableView:didSelectCellAtIndex:) here..
+
+}
+
+
+- (void)resetPointers
 {
     if ([datasource respondsToSelector:@selector(scrollableView:willSelectCellAtIndex:)])
     {
@@ -193,6 +235,7 @@
     
     [UIView beginAnimations:@"pointeranims2" context:nil];
     [UIView setAnimationDelay:1.0];
+    
     if (pointerType == PointerTypeMoving)
     {
         leftPointer.center = CGPointMake(5 * self.frame.size.width / 12.0, leftPointer.center.y);
@@ -205,6 +248,7 @@
     }
     
     [UIView commitAnimations];
+    
     CGPoint point = CGPointMake(scrollView.contentOffset.x + scrollView.bounds.size.width / 2, 5);
     selectedIndex = [scrollView subviewAtPoint:point].tag - 1;
     int i = 0;
@@ -234,7 +278,7 @@
 }
 
 
-- (void) adjustPointers
+- (void)adjustPointers
 {
     if (pointerType == PointerTypeMoving)
     {
@@ -282,7 +326,7 @@
 }
 
 
-- (void) setDatasource:(id<DPScrollableViewDatasource>)ds
+- (void)setDatasource:(id<DPScrollableViewDatasource>)ds
 {
     if (scrollView)
     {
@@ -376,8 +420,7 @@
     if ([datasource respondsToSelector:@selector(scrollableView:getViewForIndex:)])
     {
         UIView *view = [datasource scrollableView:self getViewForIndex:index];
-        int count = [datasource numberOfCellsforScrollableView:self];
-        CGFloat x = (self.frame.size.width / 3) * (count-1);
+        CGFloat x = (self.frame.size.width / 3) * index;
         view.frame = CGRectMake(x, 0, self.frame.size.width / 3, scrollView.frame.size.height);
         view.tag = index + 1;
         [[scrollView.subviews objectAtIndex:index] removeFromSuperview];
@@ -386,13 +429,13 @@
     }
 }
 
-- (UIView *) viewAtIndex:(NSUInteger)index
+- (UIView *)viewAtIndex:(NSUInteger)index
 {
     return [self viewWithTag:index + 1];
 }
 
 
-- (void) setHighlightOnAllRows:(BOOL)high
+- (void)setHighlightOnAllRows:(BOOL)high
 {
     int count = [datasource numberOfCellsforScrollableView:self];
     for (int i = 0; i < count; i++)
@@ -407,15 +450,20 @@
 }
 
 
-- (void) setSelectedIndex:(int)s
+- (void)setSelectedIndex:(int)index
 {
-    selectedIndex = s;
-    [self reset:CGPointMake( (scrollView.frame.size.width ) * s, 0 )];
-    [self resetPointers];
+    [self setSelectedIndex:index animated:YES];
 }
 
 
-- (DPScrollableViewCell *) cellAtIndex:(NSUInteger)index
+- (void)setSelectedIndex:(int)index animated:(BOOL)animated
+{
+    selectedIndex = index;
+    [self reset:CGPointMake( (scrollView.frame.size.width ) * index, 0 ) animated:animated];
+}
+
+
+- (DPScrollableViewCell *)cellAtIndex:(NSUInteger)index
 {
     id val = [scrollView.subviews objectAtIndex:index];
     if ([val isKindOfClass:[DPScrollableViewCell class]])
@@ -426,7 +474,7 @@
     return nil;
 }
 
-- (void) setFrame:(CGRect)frame
+- (void)setFrame:(CGRect)frame
 {
     [super setFrame:frame];
     self.datasource = datasource;
@@ -434,6 +482,7 @@
 }
 
 @end
+
 
 @implementation UIView (Extras)
 
